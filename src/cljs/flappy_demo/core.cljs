@@ -6,7 +6,7 @@
    [cljs.core.async :refer [<! chan sliding-buffer put! close! timeout]]
    [flappy-demo.magic :refer [reset-state world time-update pillar px]]
    [flappy-demo.config :refer [starting-state]]
-   )
+   [flappy-demo.flappy :refer [jump]])
   (:require-macros
                    [cljs.core.async.macros :refer [go-loop go]]))
 
@@ -31,7 +31,9 @@
 (defn main-template [{:keys [score cur-time jump-count
                              timer-running border-pos
                              flappy-y pillar-list]}]
-  (sab/html [:div.board { :onMouseDown nil} ;; TODO: add jump handler
+  (sab/html [:div.board { :onMouseDown (fn [e]
+                                         (.preventDefault e)
+                                         (swap! flap-state jump))}
              
              [:h1.score score]
              (if-not timer-running
@@ -53,3 +55,5 @@
                 (renderer (world n))))
   
   (reset! flap-state @flap-state))
+
+(init)

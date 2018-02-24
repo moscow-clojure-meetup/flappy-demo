@@ -2,7 +2,7 @@
   (:require [flappy-demo.config
              :refer [starting-state flappy-x flappy-width
                      pillar-width pillar-gap flappy-height
-                     bottom-y jump-vel start-y]]))
+                     bottom-y jump-vel start-y gravity]]))
 
 (defn in-pillar? [{:keys [cur-x]}]
   (and (>= (+ flappy-x flappy-width)
@@ -24,7 +24,9 @@
     (assoc st :timer-running false)
     st))
 
-(defn jump [{:keys [cur-time jump-count] :as state}]
+(defn jump
+  "Perform a bird jump"
+  [{:keys [cur-time jump-count] :as state}]
   (-> state
       (assoc
           :jump-count (inc jump-count)
@@ -37,3 +39,14 @@
   (assoc st
     :flappy-y
     (+ start-y (* 30 (.sin js/Math (/ (:time-delta st) 300))))))
+
+(defn update-flappy [{:keys [time-delta initial-vel flappy-y jump-count] :as st}]
+  (if (pos? jump-count)
+    (let [cur-vel (- initial-vel (* time-delta gravity))
+          new-y   (- flappy-y cur-vel)
+          new-y   (if (> new-y (- bottom-y flappy-height))
+                    (- bottom-y flappy-height)
+                    new-y)]
+      (assoc st
+        :flappy-y new-y))
+    (sine-wave st)))

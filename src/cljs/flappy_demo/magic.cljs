@@ -6,7 +6,7 @@
    [cljs.core.async :refer [<! chan sliding-buffer put! close! timeout]]
    [flappy-demo.config :refer [starting-state pillar-width pillar-gap pillar-spacing
                                flappy-height bottom-y start-y jump-vel gravity horiz-vel]]
-   [flappy-demo.flappy :refer [collision?]]) 
+   [flappy-demo.flappy :refer [collision? update-flappy]]) 
   (:require-macros
                    [cljs.core.async.macros :refer [go-loop go]]))
 
@@ -53,17 +53,6 @@
                                        pillar-spacing)))
                  4)]
    (assoc st :score (if (neg? score) 0 score))))
-
-(defn update-flappy [{:keys [time-delta initial-vel flappy-y jump-count] :as st}]
-  (if (pos? jump-count)
-    (let [cur-vel (- initial-vel (* time-delta gravity))
-          new-y   (- flappy-y cur-vel)
-          new-y   (if (> new-y (- bottom-y flappy-height))
-                    (- bottom-y flappy-height)
-                    new-y)]
-      (assoc st
-        :flappy-y new-y))
-    st))
 
 (defn time-update [timestamp state]
   (-> state
